@@ -1,0 +1,7 @@
+/* App-level styles (optional). Using Tailwind for most styling. */
+
+:root {
+  color-scheme: light dark;
+}
+
+/* Example utility overrides or custom classes can go here. */

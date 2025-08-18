@@ -1,0 +1,19 @@
+/* Tailwind base styles */
+@tailwind base;
+
+/* Component classes */
+@tailwind components;
+
+/* Utility classes */
+@tailwind utilities;
+
+/* Custom styles */
+@layer base {
+  html {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  /* Add your component styles here */
+}

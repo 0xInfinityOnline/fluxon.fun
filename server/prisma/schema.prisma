@@ -1,0 +1,120 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// users
+model User {
+  userId          Int            @id @default(autoincrement()) @map("user_id")
+  username        String         @unique
+  email           String         @unique
+  passwordHash    String         @map("password_hash")
+  selectedAiModel String         @default("deepseek") @map("selected_ai_model")
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  overviews       AccountOverview[]
+  posts           Post[]
+  analyses        AiAnalysis[]
+  uploads         CsvUpload[]
+
+  @@map("users")
+}
+
+// account_overview
+model AccountOverview {
+  overviewId               BigInt   @id @default(autoincrement()) @map("overview_id")
+  userId                   Int      @map("user_id")
+  date                     DateTime
+  impresiones              Int?
+  meGusta                  Int?     @map("me_gusta")
+  interacciones            Int?
+  guardados                Int?
+  compartidos              Int?
+  nuevosSeguidores         Int?     @map("nuevos_seguidores")
+  dejarDeSeguir            Int?     @map("dejar_de_seguir")
+  respuestas               Int?
+  reposts                  Int?
+  visitasPerfil            Int?     @map("visitas_perfil")
+  createPost               Int?     @map("create_post")
+  reproduccionesVideo      Int?     @map("reproducciones_video")
+  visualizacionesMultimedia Int?    @map("visualizaciones_multimedia")
+  createdAt                DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [userId])
+  analyses AiAnalysis[]
+
+  @@map("account_overview")
+}
+
+// posts (from content CSV)
+model Post {
+  postId         BigInt   @id @map("post_id")
+  userId         Int      @map("user_id")
+  fecha          DateTime?
+  textoPost      String?  @db.Text @map("texto_post")
+  urlPost        String?  @map("url_post")
+  impresiones    Int?
+  meGusta        Int?     @map("me_gusta")
+  interacciones  Int?
+  guardados      Int?
+  compartidos    Int?
+  nuevosSeguidores Int?   @map("nuevos_seguidores")
+  respuestas     Int?
+  reposts        Int?
+  visitasPerfil  Int?     @map("visitas_perfil")
+  detailExpands  Int?     @map("detail_expands")
+  urlClicks      Int?     @map("url_clicks")
+  hashtagClicks  Int?     @map("hashtag_clicks")
+  permalinkClicks Int?    @map("permalink_clicks")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user      User         @relation(fields: [userId], references: [userId])
+  analyses  AiAnalysis[]
+
+  @@map("posts")
+}
+
+// ai_analysis
+model AiAnalysis {
+  analysisId     BigInt    @id @default(autoincrement()) @map("analysis_id")
+  userId         Int       @map("user_id")
+  postId         BigInt?   @map("post_id")
+  overviewId     BigInt?   @map("overview_id")
+  modelUsed      String?   @map("model_used")
+  viralidadScore Decimal?  @map("viralidad_score")
+  bestPostTime   String?   @map("best_post_time")
+  strengths      String?   @db.Text
+  weaknesses     String?   @db.Text
+  recommendations String?  @db.Text
+  checklist      Json?
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  user     User            @relation(fields: [userId], references: [userId])
+  post     Post?           @relation(fields: [postId], references: [postId])
+  overview AccountOverview? @relation(fields: [overviewId], references: [overviewId])
+
+  @@map("ai_analysis")
+}
+
+// csv_uploads
+model CsvUpload {
+  uploadId      BigInt   @id @default(autoincrement()) @map("upload_id")
+  userId        Int      @map("user_id")
+  csvType       CsvType  @map("csv_type")
+  fileName      String?  @map("file_name")
+  rowsImported  Int?     @map("rows_imported")
+  uploadedAt    DateTime @default(now()) @map("uploaded_at")
+
+  user User @relation(fields: [userId], references: [userId])
+
+  @@map("csv_uploads")
+}
+
+enum CsvType {
+  overview
+  content
+}
